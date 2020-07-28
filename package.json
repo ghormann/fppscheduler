@@ -1,0 +1,17 @@
+{
+  "name": "gregscheduler",
+  "version": "1.0.0",
+  "description": "Advanced Scheduler for FPP",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Greg Hormann",
+  "license": "ISC",
+  "dependencies": {
+    "glob": "^7.1.6"
+  }
+}
