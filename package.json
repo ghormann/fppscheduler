@@ -12,6 +12,7 @@
   "author": "Greg Hormann",
   "license": "ISC",
   "dependencies": {
-    "glob": "^7.1.6"
+    "glob": "^7.1.6",
+    "js-beautify": "^1.11.0"
   }
 }
