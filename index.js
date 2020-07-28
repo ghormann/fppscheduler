@@ -1,8 +1,11 @@
 const playlist=require("./lib/playlist.js")
+const scheduler=require("./lib/scheduler.js")
 
-async function test() {
-   data = await playlist.readPlaylist()
-   console.log(data)
+async function init() {
+   playlist.refreshPlayList();
 }
 
-test()
+init()
+
+setInterval(scheduler.doScheduleCheck, 1500);
+setInterval(playlist.refreshPlayList, 120000); //120 seconds
