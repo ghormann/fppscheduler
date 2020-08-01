@@ -1,10 +1,10 @@
-const playlist=require("./lib/playlist.js")
-const scheduler=require("./lib/scheduler.js")
-const mymqtt=require("./lib/mymqtt.js");
+const playlist = require("./lib/playlist.js")
+const scheduler = require("./lib/scheduler.js")
+const mymqtt = require("./lib/mymqtt.js");
 
 async function init() {
-   mymqtt.init();
-   playlist.refreshPlayList();
+    mymqtt.init();
+    playlist.refreshPlayList();
 }
 
 init()
