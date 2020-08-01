@@ -4,10 +4,15 @@ const mymqtt = require("./lib/mymqtt.js");
 
 async function init() {
     mymqtt.init();
-    playlist.refreshPlayList();
+    publishPlaylist();
 }
 
 init()
 
+async function publishPlaylist() {
+    await playlist.refreshPlayList(); // Saves to data model
+    mymqtt.publishPlaylist();
+}
+
 setInterval(scheduler.doScheduleCheck, 1500);
-setInterval(playlist.refreshPlayList, 120000); //120 seconds
+setInterval(publishPlaylist, 120000); //120 seconds
