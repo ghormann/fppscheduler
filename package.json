@@ -15,6 +15,7 @@
     "axios": "^0.19.2",
     "glob": "^7.1.6",
     "js-beautify": "^1.11.0",
+    "moment": "^2.27.0",
     "mqtt": "^4.1.0",
     "properties-reader": "^2.0.0"
   }
