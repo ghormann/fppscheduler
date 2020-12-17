@@ -2,7 +2,7 @@
 A node based scheduler that runs along side of FPP and schedules songs to run.  It works with https://github.com/ghormann/Christmas-Vote-now to get the mosted voted song. Note that this project was never designed for use outside of my personal display so some code tweeks will be needed if you attempt to use it.
 
 ## Setup
-1. NOTE: This code runs on the FPP box.   It should work for both BBB and PI versions of FPP, but has only been tested on BBB.   It also requires version FPP 4.1 or greater.
+1. NOTE: This code runs on the FPP box.   It should work for both BBB and PI versions of FPP, but has only been tested on Pi.   It also requires version FPP 4.1 or greater.
 1. In FPP, your playlist should have a description defined. This will be the "nice name" that will be displayded on the voting website.
 1. Install the preqs with **sudo apt install nodejs npm**
 1. Clone this repo to somewhere on the fpp box.  (I use /home/fpp/src/fppscheduler, but it really doesn't matter)
