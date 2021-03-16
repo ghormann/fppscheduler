@@ -16,5 +16,5 @@ async function publishPlaylist() {
 
 setInterval(scheduler.doScheduleCheck, 500);
 setInterval(scheduler.doNameCheck, 5000);
-setInterval(mymqtt.sendStatus, 5000);
+setInterval(mymqtt.sendStatus, 5000); // OK
 setInterval(publishPlaylist, 120000); //120 seconds
