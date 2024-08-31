@@ -7,4 +7,4 @@ services:
     env_file:
     - mqtt.env
     extra_hosts:
-       xmas-hp.hormann.local: 192.168.0.212
+       xmas2204.hormann.local: 192.168.1.142
