@@ -17,6 +17,7 @@
     "js-beautify": "^1.15.1",
     "moment": "^2.30.1",
     "mqtt": "^5.10.1",
+    "mqtt-pattern": "^2.1.0",
     "properties-reader": "^2.3.0"
   }
 }
