@@ -1,6 +1,6 @@
-const playlist = require("./lib/playlist.js")
-const scheduler = require("./lib/scheduler.js")
-const tunnel = require("./lib/tunnelScheduler.js")
+const playlist = require("./lib/playlist.js");
+const scheduler = require("./lib/scheduler.js");
+const tunnel = require("./lib/tunnelScheduler.js");
 const mymqtt = require("./lib/mymqtt.js");
 
 async function init() {
@@ -8,7 +8,7 @@ async function init() {
     publishPlaylist();
 }
 
-init()
+init();
 
 async function publishPlaylist() {
     await playlist.refreshPlayList(); // Saves to data model
