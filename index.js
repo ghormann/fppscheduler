@@ -1,5 +1,6 @@
 const playlist = require("./lib/playlist.js")
 const scheduler = require("./lib/scheduler.js")
+const tunnel = require("./lib/tunnelScheduler.js")
 const mymqtt = require("./lib/mymqtt.js");
 
 async function init() {
@@ -15,6 +16,7 @@ async function publishPlaylist() {
 }
 
 setInterval(scheduler.doScheduleCheck, 500);
+setInterval(tunnel.doTunnelCheck, 500);
 setInterval(scheduler.doNameCheck, 5000);
 setInterval(mymqtt.sendStatus, 5000); // OK
 setInterval(mymqtt.notifyPlugs, 120000); // 120 seconds
