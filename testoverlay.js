@@ -4,12 +4,11 @@ const fpplib = require("./lib/fpp.js");
 const infoboard = new fpplib.FPPApi("192.168.1.158");
 //const infoboard = new fpplib.FPPApi("192.168.1.148");
 
-
 function sleep(ms) {
     return new Promise((resolve) => {
-      setTimeout(resolve, ms);
+        setTimeout(resolve, ms);
     });
-  }
+}
 
 async function test() {
     let today = 1242;
@@ -19,13 +18,13 @@ async function test() {
     const max_length = 15;
     const sleep_dur = 2000;
     let full_message = "Today, there have been " + today + " buttons pressed. " + popular + " has been the most popular today. ";
-    full_message +=  "This season, a total of " + season + " buttons have been pressed!"; 
+    full_message += "This season, a total of " + season + " buttons have been pressed!";
 
     let parts = full_message.split(" ");
     let msg = "";
     await infoboard.overlaySetState(1);
     for (const p of parts) {
-        if ((msg.length + p.length ) < max_length) {
+        if (msg.length + p.length < max_length) {
             msg += " ";
             msg += p;
         } else {
@@ -33,7 +32,7 @@ async function test() {
             console.log(msg);
             await infoboard.overlaySetText(msg, fontsize);
             await sleep(sleep_dur);
-            msg = p;     
+            msg = p;
         }
     }
     if (msg.length > 0) {
@@ -41,7 +40,7 @@ async function test() {
         console.log(msg);
         await infoboard.overlaySetText(msg, fontsize);
         await sleep(sleep_dur);
-        msg = "";        
+        msg = "";
     }
     await infoboard.overlayClearMessage();
     await infoboard.overlaySetState(0);
