@@ -1,10 +1,21 @@
 "use strict";
 
-const overlay = require("./lib/overlay.js");
+const fpplib = require("./lib/fpp.js");
+const infoboard = new fpplib.FPPApi("192.168.1.148");
 
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
 
 async function test() {
-    overlay.sendArrayNames(["Greg", "John", "Jeff", "John"]);
+    await infoboard.overlaySetText("This is really long");
+    await infoboard.overlaySetState(1);
+    await sleep(10000);
+    await infoboard.overlayClearMessage();
+    await infoboard.overlaySetState(0);
 }
 
 test();
