@@ -14,11 +14,27 @@ async function test() {
     let today = 1242;
     let season = 10123;
     let popular = "White";
+    let full_message = "Today, there have been " + today + " buttons pressed.   " + popular + " has been the most popular today. ";
+    full_message += "This season, a total of " + season + " buttons have been pressed!";
+    let fontsize = 48;
+    await infoboard.overlaySetState(1);
+    await infoboard.overlaySetText(full_message, fontsize, "R2L");
+    await sleep(30000);
+    await infoboard.overlayClearMessage();
+    await infoboard.overlaySetState(0);
+    console.log("Done");
+    
+}
+
+async function testold() {
+    let today = 1242;
+    let season = 10123;
+    let popular = "White";
     let fontsize = 48;
     const max_length = 15;
     const sleep_dur = 2000;
-    let full_message = "Today, there have been " + today + " buttons pressed. " + popular + " has been the most popular today. ";
-    full_message += "This season, a total of " + season + " buttons have been pressed!";
+    let full_message = "There have been " + today + " buttons pressed today.    " + popular + " has been the most popular today. ";
+    full_message += "This season a total of " + season + " buttons have been pressed!";
 
     let parts = full_message.split(" ");
     let msg = "";
@@ -47,4 +63,4 @@ async function test() {
 }
 
 test();
-setInterval(test, 25000);
+setInterval(test, 45000);
