@@ -11,8 +11,8 @@ function sleep(ms) {
 }
 
 async function test() {
-    let today = 0;
-    let season = 0;
+    let today = 1242;
+    let season = 10123;
     let popular = "White";
     let full_message = "Today, there have been " + today + " buttons pressed.   " + popular + " has been the most popular today. ";
     full_message += "This season, a total of " + season + " buttons have been pressed!";
