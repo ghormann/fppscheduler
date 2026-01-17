@@ -53,31 +53,10 @@ jobs:
         
         # Split version into parts
         IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
-        
-        # Check for conventional commit messages to determine version bump
-        COMMIT_MSG=$(git log --format=%B -n 1 HEAD)
-        echo "Commit message: $COMMIT_MSG"
-        
-        if [[ "$COMMIT_MSG" == *"BREAKING CHANGE"* ]] || [[ "$COMMIT_MSG" =~ ^[a-zA-Z]+(\(.+\))?!: ]]; then
-          # Major version bump
-          MAJOR=$((MAJOR + 1))
-          MINOR=0
-          PATCH=0
-        elif [[ "$COMMIT_MSG" =~ ^feat(\(.+\))?: ]]; then
-          # Minor version bump
-          MINOR=$((MINOR + 1))
-          PATCH=0
-        else
-          # Patch version bump
-          PATCH=$((PATCH + 1))
-        fi
-        
-        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-        echo "New version: $NEW_VERSION"
-        
+                
         # Set outputs
-        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-        echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+        echo "tag=v$LATEST_VERSION" >> $GITHUB_OUTPUT
     
     - name: Create and push tag
       run: |
