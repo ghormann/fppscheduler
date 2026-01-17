@@ -1,8 +1,42 @@
 # fppscheduler
 A node based scheduler that runs along side of FPP and schedules songs to run.  It works with https://github.com/ghormann/Christmas-Vote-now to get the mosted voted song. Note that this project was never designed for use outside of my personal display so some code tweeks will be needed if you attempt to use it.
 
+## Docker Repository
+
+This project is automatically built and published as a Docker image to a private repo using GitHub Actions.
+
+### Semantic Versioning
+
+The project uses semantic versioning with the following rules:
+- **Patch** version bump (x.x.+1): Default for any commit to main
+- **Minor** version bump (x.+1.0): When commit message starts with `feat:` or `feat(`
+- **Major** version bump (+1.0.0): When commit message contains `BREAKING CHANGE` or uses `!` (e.g., `feat!:`, `fix!:`)
+
+#### Manual Releases
+
+You can also create releases manually using the "Create Release" workflow:
+1. Go to the "Actions" tab in your GitHub repository
+2. Select "Create Release" workflow
+3. Click "Run workflow"
+4. Choose the version type (patch/minor/major) and whether it's a pre-release
+5. Click "Run workflow"
+
+This will:
+- Update the version in package.json
+- Create a git tag
+- Create a GitHub release with changelog
+- Trigger the Docker build and push
+
+#### Available Docker Tags
+
+The following tags are automatically created:
+- `latest`: Latest build from main branch
+- `vX.Y.Z`: Specific version tag
+- `vX.Y`: Major.minor version
+- `vX`: Major version only
+
 ## Setup
-1. NOTE: This code runs on the FPP box.   It should work for both BBB and PI versions of FPP, but has only been tested on Pi.   It also requires version FPP 4.1 or greater.
+1. NOTE: This code runs as a sepereate docker container and connects to yourS FPP box.   It should work for both BBB and PI versions of FPP, but has only been tested on Pi.   It also requires version FPP 4.1 or greater.
 1. In FPP, your playlist should have a description defined. This will be the "nice name" that will be displayded on the voting website.
 1. Install the preqs with **sudo apt install nodejs npm**
 1. Clone this repo to somewhere on the fpp box.  (I use /home/fpp/src/fppscheduler, but it really doesn't matter)
