@@ -1,7 +1,10 @@
+const model = require("./lib/model.js");
 const playlist = require("./lib/playlist.js");
 const scheduler = require("./lib/scheduler.js");
 const tunnel = require("./lib/tunnelScheduler.js");
 const mymqtt = require("./lib/mymqtt.js");
+
+model.loadOverrides();
 
 async function init() {
     mymqtt.init();

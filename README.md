@@ -49,9 +49,43 @@ Key source files:
    | `FPP_TUNNEL_SIGN` | Info sign FPP box IP (e.g. `192.168.1.4`) |
    | `TZ`              | Timezone (e.g. `America/New_York`)        |
 
-5. Edit `lib/model.js` to set `internal_songs` — the list of playlist names that the scheduler manages internally (intros, bumpers, donation reminders, etc.). Use an empty array to always play the top-voted song.
+5. Optionally create an `override.js` file in the project root to customize `short_show_list` and `internal_songs` without editing core files. See [Override File](#override-file) below.
 
-6. If you use the **short show** feature, edit `lib/mode.js` with the playlists to use during short-show mode.
+---
+
+## Override File
+
+Create an `override.js` file in the project root to customize key data-model values at startup without editing `lib/model.js`. The file is optional — if it is absent the defaults in `model.js` are used unchanged. Any override applied is logged to the console with an `[override]` prefix.
+
+### `short_show_list`
+
+An array of playlist names used during short-show mode. Must be an array of strings; any other shape is silently ignored.
+
+```js
+// override.js
+module.exports = {
+    short_show_list: ["The_Grinch", "Hippo", "Magic"],
+};
+```
+
+### `internal_songs`
+
+Replaces the full list of internally managed playlists. Each entry requires `playlist`, `frequency_min`, and `enabled`. The optional `next_minutes` field sets the initial delay from startup before the playlist is first eligible to play (defaults to `0` — eligible immediately).
+
+```js
+// override.js
+module.exports = {
+    internal_songs: [
+        { playlist: "Internal_Driveway",    frequency_min: 25, enabled: true,  next_minutes: 15 },
+        { playlist: "Internal_Donate",      frequency_min: 15, enabled: true,  next_minutes: 1  },
+        { playlist: "Internal_TuneTo",      frequency_min: 10, enabled: true,  next_minutes: 5  },
+        { playlist: "Internal_Intro",       frequency_min: 25, enabled: false },
+        { playlist: "Internal_Short_Show",  frequency_min: 10, enabled: false },
+    ],
+};
+```
+
+Both keys are optional; you can override one without the other.
 
 ---
 
