@@ -101,6 +101,16 @@ Master enable/disable switch for the scheduler. When `FALSE`, the scheduler will
 
 ---
 
+### `/christmas/setActive/tunnel`
+
+Enable/disable switch for the tunnel scheduler only. When `FALSE`, the tunnel scheduler will not start new sequences, even if the master `setActive` is `TRUE`. Both this flag and `/christmas/setActive` must be `TRUE` for the tunnel to run.
+
+Defaults to `TRUE` on startup.
+
+**Payload:** String — `"TRUE"` or `"FALSE"`
+
+---
+
 ### `/christmas/namechecker/health`
 
 Heartbeat from the name checker/text server service. Absence for >90 seconds raises `SCHEDULER_NO_TEXT_SERVER`.
@@ -170,6 +180,7 @@ Full system state snapshot published every 5 seconds. Contains the current song,
   "idleDate": "2024-12-15T20:00:00.000Z",
   "nameStatus": "idle",
   "enabled": true,
+  "tunnelEnabled": true,
   "debug": false,
   "shortList": false
 }
@@ -190,6 +201,7 @@ Full system state snapshot published every 5 seconds. Contains the current song,
 | `idleDate`          | ISO timestamp  | When the scheduler last detected an idle (no song playing) condition     |
 | `nameStatus`        | string         | Status string from the name queue service                                |
 | `enabled`           | boolean        | Whether the scheduler is enabled (controlled by `setActive`)             |
+| `tunnelEnabled`     | boolean        | Whether the tunnel scheduler is enabled (controlled by `setActive/tunnel`) |
 | `debug`             | boolean        | Whether debug mode is on (controlled by `vote/debug`)                    |
 | `shortList`         | boolean        | Whether short-show mode is active (controlled by `vote/setShortList`)    |
 
