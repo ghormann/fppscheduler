@@ -8,3 +8,5 @@ services:
     - mqtt.env
     extra_hosts:
        xmas2204.hormann.local: 192.168.1.142
+    volumes:
+      - ./cache:/usr/src/app/cache
