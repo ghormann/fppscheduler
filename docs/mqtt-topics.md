@@ -267,7 +267,7 @@ Maps each button color to the tunnel light sequences available for that color. P
 
 ### `/christmas/scheduler/name_estimate`
 
-Estimated wait time until the next name/wish playback. Published approximately every second during display hours.
+Estimated wait time until the names already queued (or rendered) play, shown on vote-now.org. Says "now" while they are playing. Published approximately every second during display hours.
 
 **Payload:** JSON object
 
@@ -275,6 +275,19 @@ Estimated wait time until the next name/wish playback. Published approximately e
 {
   "estimated_seconds": 180,
   "message": "Your name will play in about 3 minutes"
+}
+```
+
+---
+
+### `/christmas/scheduler/new_name_estimate`
+
+Estimated wait for a name texted right now, used for the SMS reply. Same payload as `name_estimate`. While a batch is PENDING, GENERATING, READY or playing, the new name is not in that batch, so this counts toward the following batch and never says "now". Published approximately every second.
+
+```json
+{
+  "estimated_seconds": 540,
+  "message": "in about 9 minutes"
 }
 ```
 

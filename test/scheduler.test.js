@@ -12,6 +12,7 @@ jest.mock("../lib/fpp.js", () => ({
 
 jest.mock("../lib/mymqtt.js", () => ({
     sendNameEstimates: jest.fn(),
+    sendNewNameEstimates: jest.fn(),
     sendNameAction: jest.fn(),
     notifyPlugs: jest.fn(),
 }));
@@ -227,5 +228,86 @@ describe("setNameEstimate()", () => {
         expect(mymqtt.sendNameEstimates).toHaveBeenCalledWith(
             expect.objectContaining({ estimated_seconds: 0, message: "now" })
         );
+    });
+});
+
+
+// ── setNewNameEstimate() ──────────────────────────────────────────────────────
+
+describe("setNewNameEstimate()", () => {
+    test("does not say 'now' while Internal_Wish_Name is playing", () => {
+        dataModel.current.song = "Internal_Wish_Name";
+        scheduler.setNewNameEstimate(400, null);
+        expect(mymqtt.sendNewNameEstimates).toHaveBeenCalledWith(
+            expect.objectContaining({ estimated_seconds: 400, message: "in about 7 minutes" })
+        );
+        expect(mymqtt.sendNameEstimates).not.toHaveBeenCalled();
+    });
+});
+
+// ── doNameCheck() new-name estimate ───────────────────────────────────────────
+
+describe("doNameCheck() new-name estimate", () => {
+    beforeEach(() => {
+        dataModel.current.isDisplayHours = true;
+        dataModel.current.enabled = true;
+        dataModel.current.sequence = "";
+        dataModel.current.lastNameGen = new Date(Date.now() - 60000);
+        dataModel.current.lastNamePlay = new Date(Date.now() - 60000);
+        dataModel.clock.time = 600;
+        dataModel.nameQueue = { status: "IDLE", normal: [], low: [], ready: [] };
+        dataModel.seconds_remaining = 0;
+    });
+
+    afterEach(() => {
+        dataModel.current.isDisplayHours = false;
+        dataModel.nameQueue = { status: "IDLE", normal: [], low: [], ready: [] };
+        dataModel.seconds_remaining = 0;
+    });
+
+    function last(fn) {
+        let calls = fn.mock.calls;
+        return calls[calls.length - 1][0];
+    }
+
+    test.each(["PENDING", "GENERATING", "READY"])("%s never estimates under 4 minutes", (status) => {
+        dataModel.nameQueue.status = status;
+        dataModel.current.nameStatus = status;
+        scheduler.doNameCheck();
+        expect(last(mymqtt.sendNewNameEstimates).estimated_seconds).toBeGreaterThanOrEqual(240);
+    });
+
+    test("waits for the next batch while names play, but the website still says 'now'", () => {
+        dataModel.nameQueue.status = "READY";
+        dataModel.current.nameStatus = "READY";
+        dataModel.current.sequence = "Wish_Name.fseq";
+        dataModel.current.song = "Internal_Wish_Name";
+        dataModel.seconds_remaining = 20;
+        dataModel.nameQueue.normal = [{ name: "Bob", ts: Date.now() / 1000 }];
+        scheduler.doNameCheck();
+        expect(last(mymqtt.sendNameEstimates)).toEqual({ estimated_seconds: 0, message: "now" });
+        // A fresh name waits max_dur (9 min) from its arrival
+        expect(last(mymqtt.sendNewNameEstimates).estimated_seconds).toBe(540);
+    });
+
+    test("counts the current song and name playback when READY", () => {
+        dataModel.nameQueue.status = "READY";
+        dataModel.current.nameStatus = "READY";
+        dataModel.seconds_remaining = 200;
+        dataModel.nameQueue.normal = [{ name: "Bob", ts: Date.now() / 1000 - 400 }];
+        scheduler.doNameCheck();
+        expect(last(mymqtt.sendNameEstimates).estimated_seconds).toBe(200);
+        expect(last(mymqtt.sendNewNameEstimates).estimated_seconds).toBe(200 + 65 + 240);
+    });
+
+    test("an empty IDLE queue quotes max_dur for a new name", () => {
+        scheduler.doNameCheck();
+        expect(last(mymqtt.sendNewNameEstimates).estimated_seconds).toBe(540);
+    });
+
+    test("publishes the same message on both topics outside display hours", () => {
+        dataModel.current.isDisplayHours = false;
+        scheduler.doNameCheck();
+        expect(last(mymqtt.sendNewNameEstimates)).toEqual(last(mymqtt.sendNameEstimates));
     });
 });
