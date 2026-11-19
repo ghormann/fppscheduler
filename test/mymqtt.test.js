@@ -235,3 +235,107 @@ describe("handler: /christmas/FPPButton/#", () => {
         expect(datamodel.tunnel.button).toBe("Blue");
     });
 });
+
+// ── smart plugs ──────────────────────────────────────────────────────────────
+
+beforeAll(() => {
+    mymqtt.init(); // wires up mockClient for publish tests
+    // Fire the "connect" event so init()'s connection-timeout timer is cleared.
+    const onConnect = mockClient.on.mock.calls.find(c => c[0] === "connect")[1];
+    onConnect();
+});
+
+describe("notifyPlugs", () => {
+    test("does not control plug-aux2 (owned by auxScheduler)", () => {
+        mymqtt.notifyPlugs();
+        const topics = mockClient.publish.mock.calls.map(c => c[0]);
+        expect(topics).toEqual([
+            "plug-radio/command/switch:0",
+            "plug-buttons/command/switch:0",
+            "plug-aux1/command/switch:0",
+        ]);
+    });
+});
+
+describe("setPlug", () => {
+    test("publishes the status to the plug's switch topic", () => {
+        mymqtt.setPlug("plug-aux2", "off");
+        expect(mockClient.publish).toHaveBeenCalledWith("plug-aux2/command/switch:0", "off", expect.any(Function));
+    });
+});
+
+describe("pingPlugs", () => {
+    test("sends status_update to every monitored plug", () => {
+        mymqtt.pingPlugs();
+        const calls = mockClient.publish.mock.calls.map(c => [c[0], c[1]]);
+        expect(calls).toEqual(mymqtt.MONITORED_PLUGS.map(p => [p + "/command", "status_update"]));
+    });
+
+    test("status subscription matches the bare <plug>/status reply Shelly sends", () => {
+        const { matches } = jest.requireActual("mqtt-pattern");
+        expect(matches("plug-radio/status/#", "plug-radio/status")).toBe(true);
+        expect(matches("plug-radio/status/#", "plug-radio/status/switch:0")).toBe(true);
+    });
+
+    test("a status handler is registered for every monitored plug", () => {
+        for (const plug of mymqtt.MONITORED_PLUGS) {
+            expect(handlerFor(plug + "/status/#")).toBeDefined();
+        }
+    });
+});
+
+// ── sendStatus: plug and sign warnings ───────────────────────────────────────
+
+describe("sendStatus warnings", () => {
+    afterEach(() => jest.useRealTimers());
+
+    function statusAt(date) {
+        jest.setSystemTime(date);
+        mymqtt.sendStatus();
+        return datamodel.current.status.split(",");
+    }
+
+    function touchAllPlugs() {
+        for (const plug of mymqtt.MONITORED_PLUGS) {
+            handlerFor(plug + "/status/#").callback(plug + "/status/switch:0", Buffer.from("{}"));
+        }
+    }
+
+    function fppSeen(playerId) {
+        handlerFor("/christmas/falcon/player/+/fppd_status")
+            .callback("/christmas/falcon/player/" + playerId + "/fppd_status", Buffer.from("{}"));
+    }
+
+    test("warns for a plug silent for more than 10 minutes", () => {
+        jest.useFakeTimers({ now: new Date(2030, 0, 1, 12, 0) });
+        touchAllPlugs();
+        jest.setSystemTime(new Date(2030, 0, 1, 12, 5));
+        handlerFor("plug-radio/status/#").callback("plug-radio/status/switch:0", Buffer.from("{}"));
+
+        const status = statusAt(new Date(2030, 0, 1, 12, 11));
+        expect(status).not.toContain("SCHEDULER_NO_PLUG_plug-radio");
+        expect(status).toContain("SCHEDULER_NO_PLUG_plug-aux2");
+    });
+
+    test("no plug warning within 10 minutes", () => {
+        jest.useFakeTimers({ now: new Date(2030, 0, 1, 12, 0) });
+        touchAllPlugs();
+        const status = statusAt(new Date(2030, 0, 1, 12, 9));
+        expect(status.filter(s => s.startsWith("SCHEDULER_NO_PLUG_"))).toEqual([]);
+    });
+
+    test.each([
+        [new Date(2030, 0, 1, 9, 4), false],
+        [new Date(2030, 0, 1, 12, 0), false],
+        [new Date(2030, 0, 1, 17, 9), false],
+        [new Date(2030, 0, 1, 17, 10), true],
+        [new Date(2030, 0, 1, 8, 59), true],
+    ])("FPPTunnelSign offline at %s → warned: %s", (when, warned) => {
+        jest.useFakeTimers({ now: new Date(when.getTime() - 10 * 60000) });
+        fppSeen("FPPTunnelSign");
+        fppSeen("FPPOther");
+        const status = statusAt(when);
+        expect(status.includes("SCHEDULER_NO_FPP_FPPTunnelSign")).toBe(warned);
+        expect(status).toContain("SCHEDULER_NO_FPP_FPPOther"); // other players never suppressed
+    });
+});

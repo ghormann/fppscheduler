@@ -2,6 +2,7 @@ const model = require("./lib/model.js");
 const playlist = require("./lib/playlist.js");
 const scheduler = require("./lib/scheduler.js");
 const tunnel = require("./lib/tunnelScheduler.js");
+const aux = require("./lib/auxScheduler.js");
 const mymqtt = require("./lib/mymqtt.js");
 const stateCache = require("./lib/stateCache.js");
 
@@ -42,3 +43,8 @@ setInterval(mymqtt.sendStatus, 5000); // OK
 setInterval(mymqtt.notifyPlugs, 120000); // 120 seconds
 setInterval(publishPlaylist, 120000); //120 seconds
 setInterval(tunnel.publishButtonMapping, 120000); //120 seconds
+setInterval(aux.doAuxCheck, 60000); // 60 seconds: tunnel sign power schedule (plug-aux2)
+setInterval(mymqtt.pingPlugs, 300000); // 5 minutes: ask Shelly plugs to report status
+// Run both once shortly after startup (MQTT queues publishes until connected).
+setTimeout(aux.doAuxCheck, 5000);
+setTimeout(mymqtt.pingPlugs, 5000);
