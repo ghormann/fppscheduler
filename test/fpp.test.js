@@ -71,6 +71,21 @@ describe("getFppStatus()", () => {
     });
 });
 
+// ── systemShutdown() ─────────────────────────────────────────────────────────
+
+describe("systemShutdown()", () => {
+    test("POSTs to the FPP shutdown endpoint", async () => {
+        axios.mockResolvedValue({ data: {} });
+
+        await api.systemShutdown();
+
+        expect(axios).toHaveBeenCalledWith(expect.objectContaining({
+            url: `http://${HOST}/api/system/shutdown`,
+            method: "POST", // GET is deprecated and returns 405 in FPP 11
+        }));
+    });
+});
+
 // ── playNow() ────────────────────────────────────────────────────────────────
 
 describe("playNow()", () => {
@@ -81,6 +96,7 @@ describe("playNow()", () => {
 
         expect(axios).toHaveBeenCalledWith(expect.objectContaining({
             url: `http://${HOST}/api/playlist/My_Playlist/start`,
+            method: "POST", // GET is deprecated and returns 405 in FPP 11
         }));
     });
 
