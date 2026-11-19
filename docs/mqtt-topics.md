@@ -123,7 +123,7 @@ Heartbeat from the name checker/text server service. Absence for >90 seconds rai
 
 FPP status heartbeat from any player (wildcard `+` matches the player ID). Used to detect when a player goes offline.
 
-Absence for >180 seconds raises `SCHEDULER_NO_FPP_{playerId}`.
+Absence for >180 seconds raises `SCHEDULER_NO_FPP_{playerId}`. The warning for `FPPTunnelSign` is suppressed from 09:00 to 17:10 local time, while the sign is powered off on purpose (see Smart Plug Topics).
 
 **Payload:** FPP status JSON (standard FPP MQTT status format)
 
@@ -220,7 +220,8 @@ Full system state snapshot published every 5 seconds. Contains the current song,
 | `SCHEDULER_NO_TEXT_SERVER`  | Name checker service offline for >90 seconds                 |
 | `SCHEDULER_NO_TUNNEL`       | Tunnel FPP offline for >30 seconds                           |
 | `SCHEDULER_NO_BUTTON`       | Button pad FPP offline for >30 seconds                       |
-| `SCHEDULER_NO_FPP_{id}`     | Named FPP player offline for >180 seconds                    |
+| `SCHEDULER_NO_FPP_{id}`     | Named FPP player offline for >180 seconds (`FPPTunnelSign` suppressed 09:00–17:10) |
+| `SCHEDULER_NO_PLUG_{plug}`  | Shelly plug hasn't answered a status ping for >10 minutes |
 
 ---
 
@@ -325,16 +326,30 @@ Commands sent to the name generator service.
 
 ## Smart Plug Topics
 
-These topics control smart plugs (Shelly or compatible) that power physical display components. They are published when display hours start and stop.
+These topics control smart plugs (Shelly Gen2+) that power physical display components. `plug-radio`, `plug-buttons` and `plug-aux1` follow display hours and are re-sent every 2 minutes.
 
 | Topic                           | Controls                 |
 | ------------------------------- | ------------------------ |
 | `plug-radio/command/switch:0`   | FM transmitter / radio   |
 | `plug-buttons/command/switch:0` | Button pad hardware      |
 | `plug-aux1/command/switch:0`    | Auxiliary power switch 1 |
-| `plug-aux2/command/switch:0`    | Auxiliary power switch 2 |
+| `plug-aux2/command/switch:0`    | Tunnel info sign (FPP_TUNNEL_SIGN) |
 
 **Payload:** String — `"on"` or `"off"`
+
+### Tunnel sign schedule (`plug-aux2`)
+
+`plug-aux2` is driven by `lib/auxScheduler.js` once a minute, independent of display hours (times are server-local, `TZ=America/New_York` in production):
+
+| Local time    | Action                                                                  |
+| ------------- | ----------------------------------------------------------------------- |
+| 09:00 – 09:05 | `GET /api/system/shutdown` on FPP_TUNNEL_SIGN; plug held `"on"`         |
+| 09:05 – 16:55 | plug held `"off"`                                                       |
+| otherwise     | plug held `"on"`                                                        |
+
+### Plug health ping
+
+Every 5 minutes the scheduler publishes `"status_update"` to `<plug>/command` for each plug above. The plug replies with a full status JSON on `<plug>/status` (the scheduler subscribes to `<plug>/status/#`, which also matches that topic), and if a plug sends nothing on that topic for >10 minutes the scheduler raises `SCHEDULER_NO_PLUG_{plug}`.
 
 ---
 
